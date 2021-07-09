@@ -1,0 +1,2 @@
+rootProject.name = "FCM sample"
+include ':app'
