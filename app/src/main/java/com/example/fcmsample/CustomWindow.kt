@@ -5,6 +5,7 @@ import android.content.Context.WINDOW_SERVICE
 import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
+import android.os.PowerManager
 import android.util.Log
 import android.view.*
 import android.widget.Button
@@ -40,6 +41,16 @@ class CustomWindow(private val context: Context) {
         try {
             if (view.windowToken == null) {
                 if (view.parent == null) {
+                    val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
+                    val isScreenOn =
+                        if (Build.VERSION.SDK_INT >= 20) pm.isInteractive else pm.isScreenOn
+                    val flags = (PowerManager.FULL_WAKE_LOCK
+                            or PowerManager.ACQUIRE_CAUSES_WAKEUP
+                            or PowerManager.ON_AFTER_RELEASE)
+                    if (!isScreenOn) {
+                        pm.newWakeLock(flags, "FCMSample:full_lock").acquire(20000)
+                        pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,"FCMSample:full_cpu_lock").acquire(20000)
+                    }
                     windowManager.addView(view, params)
                 }
             }
